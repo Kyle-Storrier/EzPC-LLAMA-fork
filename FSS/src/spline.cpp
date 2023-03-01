@@ -843,6 +843,10 @@ GroupElement evalSigmoid_main_wrapper(int party, GroupElement x, SplineKeyPack &
 std::pair<SplineKeyPack, SplineKeyPack> keyGenTanh_main_wrapper(int Bin, int Bout, int scaleIn, int scaleOut,
                     GroupElement rin, GroupElement rout)
 {
+
+    // imp: make sure different choices of i/p, o/p scales use same coef scale
+    int scaleCoef = 18, coefBitsize = 64;
+
     // todo: add other scales
     assert((Bin == 64) && (Bout == 64));
 #if defined(TANH_12_12) || defined(SIGMOID_TANH_37)
@@ -855,12 +859,12 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenTanh_main_wrapper(int Bin, int Bou
     assert((scaleIn == 11) && (scaleOut == 11));
 #elif defined(TANH_13_13)
     assert((scaleIn == 13) && (scaleOut == 13));
+#elif defined(TANH_GROTTO_9_9)
+    assert((scaleIn == 9) && (scaleOut == 9));
+    scaleCoef = 9;
 #else 
     throw std::invalid_argument("no scales selected for tanh");
 #endif
-
-    // imp: make sure different choices of i/p, o/p scales use same coef scale
-    int scaleCoef = 18, coefBitsize = 64;
 
     int ib = Bin, cb = coefBitsize, ob = Bout, sin = scaleIn, scoef = scaleCoef, sout = scaleOut;
     // from octave:
@@ -1134,6 +1138,54 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenTanh_main_wrapper(int Bin, int Bou
         GroupElement( -7022, ib),
         GroupElement( -4682, ib),
         GroupElement( -2341, ib)
+    };
+#elif defined(TANH_GROTTO_9_9)  // scale is not 12 (input scale 9, output scale 9)
+    std::vector<std::vector<GroupElement>> fxd_polynomials 
+    {
+        { GroupElement(65371, cb), GroupElement(0, cb), GroupElement(133955584, cb), GroupElement(0, cb) },
+        { GroupElement(65459, cb), GroupElement(33518080, cb), GroupElement(139460608, cb), GroupElement(8795824586752, cb) },
+        { GroupElement(17, cb), GroupElement(33435648, cb), GroupElement(163577856, cb), GroupElement(8793542885376, cb) },
+        { GroupElement(55, cb), GroupElement(33386496, cb), GroupElement(185073664, cb), GroupElement(8790321659904, cb) },
+        { GroupElement(31, cb), GroupElement(33440768, cb), GroupElement(142868480, cb), GroupElement(5234491392, cb) },
+        { GroupElement(12, cb), GroupElement(33499136, cb), GroupElement(82837504, cb), GroupElement(25769803776, cb) },
+        { GroupElement(3, cb), GroupElement(33536000, cb), GroupElement(33816576, cb), GroupElement(47513075712, cb) },
+        { GroupElement(0, cb), GroupElement(33551360, cb), GroupElement(7602176, cb), GroupElement(62545461248, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(262144, cb), GroupElement(68316823552, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(68585259008, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(8727507763200, cb) },
+        { GroupElement(0, cb), GroupElement(512, cb), GroupElement(2359296, cb), GroupElement(8729655246848, cb) },
+        { GroupElement(1, cb), GroupElement(9216, cb), GroupElement(19136512, cb), GroupElement(8740661100544, cb) },
+        { GroupElement(7, cb), GroupElement(35328, cb), GroupElement(57933824, cb), GroupElement(8759988453376, cb) },
+        { GroupElement(21, cb), GroupElement(85504, cb), GroupElement(115605504, cb), GroupElement(8782268596224, cb) },
+        { GroupElement(45, cb), GroupElement(147456, cb), GroupElement(170917888, cb), GroupElement(2415919104, cb) },
+        { GroupElement(52, cb), GroupElement(163840, cb), GroupElement(182976512, cb), GroupElement(5368709120, cb) },
+        { GroupElement(65527, cb), GroupElement(90112, cb), GroupElement(153616384, cb), GroupElement(1476395008, cb) },
+        { GroupElement(65424, cb), GroupElement(16896, cb), GroupElement(135790592, cb), GroupElement(0, cb) },
+        { GroupElement(65371, cb), GroupElement(0, cb), GroupElement(133955584, cb), GroupElement(0, cb) },
+    };
+
+    std::vector<GroupElement> fxd_p 
+    {
+        GroupElement(0, ib),
+        GroupElement(133, ib),
+        GroupElement(290, ib),
+        GroupElement(464, ib),
+        GroupElement(776, ib),
+        GroupElement(1027, ib),
+        GroupElement(1331, ib),
+        GroupElement(1739, ib),
+        GroupElement(2405, ib),
+        GroupElement(4215, ib),
+        GroupElement(-32768, ib),
+        GroupElement(-2951, ib),
+        GroupElement(-1988, ib),
+        GroupElement(-1499, ib),
+        GroupElement(-1157, ib),
+        GroupElement(-886, ib),
+        GroupElement(-636, ib),
+        GroupElement(-401, ib),
+        GroupElement(-238, ib),
+        GroupElement(-79, ib)
     };
 #else 
     throw std::invalid_argument("no scales selected for tanh");

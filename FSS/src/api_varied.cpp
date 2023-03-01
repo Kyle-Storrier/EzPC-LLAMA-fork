@@ -1744,6 +1744,10 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     always_assert(shift_in == 13);
     always_assert(shift_out == 13);
     int ib = 64, ob = 64, sin = 13, scoef = 18, sout = 13, degree = 2, numPoly = 12;
+#elif defined(TANH_GROTTO_9_9)
+    always_assert(shift_in == 9);
+    always_assert(shift_out == 9);
+    int ib = 64, ob = 64, sin = 9, scoef = 9, sout = 9, degree = 3, numPoly = 20; // TODO: Verify these numbers
 #else 
     throw std::invalid_argument("no scales selected for tanh");
 #endif
