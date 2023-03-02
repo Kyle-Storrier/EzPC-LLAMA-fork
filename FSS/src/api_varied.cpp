@@ -1594,6 +1594,10 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     always_assert(shift_in == 13);
     always_assert(shift_out == 14);
     int ib = 64, ob = 64, sin = 13, scoef = 20, sout = 14, degree = 2, numPoly = 29;
+#elif defined(SIGMOID_GROTTO_9_9)
+    always_assert(shift_in == 9);
+    always_assert(shift_out == 9);
+    int ib = 64, ob = 64, sin = 9, scoef = 9, sout = 9, degree = 3, numPoly = 85;
 #else 
     throw std::invalid_argument("no scales selected for sigmoid");
 #endif
@@ -1884,6 +1888,10 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     always_assert(shift_in == 12);
     always_assert(shift_out == 11);
     int ib = 64, ob = 64, sin = 12, scoef = 13, sout = 11, degree = 2, numPoly = 10;
+#elif defined(INVSQRT_GROTTO_9_9)
+    always_assert(shift_in == 9);
+    always_assert(shift_out == 9);
+    int ib = 64, ob = 64, sin = 9, scoef = 9, sout = 9, degree = 3, numPoly = 40;
 #else
     throw std::invalid_argument("no scales selected for invsqrt");
 #endif
