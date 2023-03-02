@@ -349,6 +349,8 @@ GroupElement evalSigmoid(int party, GroupElement x, SplineKeyPack &k)
 std::pair<SplineKeyPack, SplineKeyPack> keyGenSigmoid_main_wrapper(int Bin, int Bout, int scaleIn, int scaleOut,
                     GroupElement rin, GroupElement rout)
 {
+    int scaleCoef = 20, coefBitsize = 64;
+
     // todo: add other scales
     assert((Bin == 64) && (Bout == 64));
 #if defined(SIGMOID_12_12) || defined(SIGMOID_TANH_37)
@@ -361,13 +363,14 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenSigmoid_main_wrapper(int Bin, int 
     assert((scaleIn == 11) && (scaleOut == 14));
 #elif defined(SIGMOID_13_14)
     assert((scaleIn == 13) && (scaleOut == 14));
+#elif defined(SIGMOID_GROTTO_9_9)
+    assert((scaleIn == 9) && (scaleOut == 9));
+    scaleCoef = 9;
 #else 
     throw std::invalid_argument("no scales selected for sigmoid");
 #endif
 
     // imp: make sure different choices of i/p, o/p scales use same coef scale
-    int scaleCoef = 20, coefBitsize = 64;
-
     int ib = Bin, cb = coefBitsize, ob = Bout, sin = scaleIn, scoef = scaleCoef, sout = scaleOut;
     
     // from octave:
@@ -825,6 +828,184 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenSigmoid_main_wrapper(int Bin, int 
         GroupElement( -9363, ib),
         GroupElement( -4682, ib)
     };
+#elif defined(SIGMOID_GROTTO_9_9)
+    std::vector<std::vector<GroupElement>> fxd_polynomials 
+    {
+        { GroupElement(65526, cb), GroupElement(0, cb), GroupElement(33554432, cb), GroupElement(34225520640, cb) },
+        { GroupElement(65527, cb), GroupElement(0, cb), GroupElement(33554432, cb), GroupElement(34225520640, cb) },
+        { GroupElement(65528, cb), GroupElement(33553408, cb), GroupElement(33554432, cb), GroupElement(34225520640, cb) },
+        { GroupElement(65530, cb), GroupElement(33551872, cb), GroupElement(34078720, cb), GroupElement(34225520640, cb) },
+        { GroupElement(65532, cb), GroupElement(33549824, cb), GroupElement(34865152, cb), GroupElement(34091302912, cb) },
+        { GroupElement(65533, cb), GroupElement(33547264, cb), GroupElement(36175872, cb), GroupElement(33957085184, cb) },
+        { GroupElement(65535, cb), GroupElement(33544704, cb), GroupElement(37486592, cb), GroupElement(33688649728, cb) },
+        { GroupElement(0, cb), GroupElement(33541632, cb), GroupElement(39321600, cb), GroupElement(33285996544, cb) },
+        { GroupElement(1, cb), GroupElement(33539072, cb), GroupElement(41418752, cb), GroupElement(32749125632, cb) },
+        { GroupElement(2, cb), GroupElement(33536512, cb), GroupElement(43515904, cb), GroupElement(32212254720, cb) },
+        { GroupElement(3, cb), GroupElement(33534464, cb), GroupElement(45350912, cb), GroupElement(31675383808, cb) },
+        { GroupElement(3, cb), GroupElement(33533440, cb), GroupElement(46661632, cb), GroupElement(31272730624, cb) },
+        { GroupElement(3, cb), GroupElement(33533440, cb), GroupElement(46137344, cb), GroupElement(31406948352, cb) },
+        { GroupElement(3, cb), GroupElement(33534976, cb), GroupElement(44302336, cb), GroupElement(32212254720, cb) },
+        { GroupElement(2, cb), GroupElement(33537024, cb), GroupElement(41418752, cb), GroupElement(33688649728, cb) },
+        { GroupElement(2, cb), GroupElement(33539072, cb), GroupElement(38010880, cb), GroupElement(35567697920, cb) },
+        { GroupElement(1, cb), GroupElement(33541120, cb), GroupElement(34340864, cb), GroupElement(37715181568, cb) },
+        { GroupElement(1, cb), GroupElement(33543168, cb), GroupElement(30408704, cb), GroupElement(40265318400, cb) },
+        { GroupElement(1, cb), GroupElement(33545216, cb), GroupElement(26214400, cb), GroupElement(43083890688, cb) },
+        { GroupElement(0, cb), GroupElement(33547264, cb), GroupElement(22282240, cb), GroupElement(46036680704, cb) },
+        { GroupElement(0, cb), GroupElement(33548800, cb), GroupElement(18350080, cb), GroupElement(48989470720, cb) },
+        { GroupElement(0, cb), GroupElement(33549824, cb), GroupElement(14942208, cb), GroupElement(51942260736, cb) },
+        { GroupElement(0, cb), GroupElement(33551360, cb), GroupElement(11534336, cb), GroupElement(54895050752, cb) },
+        { GroupElement(0, cb), GroupElement(33552384, cb), GroupElement(8912896, cb), GroupElement(57579405312, cb) },
+        { GroupElement(0, cb), GroupElement(33552896, cb), GroupElement(6553600, cb), GroupElement(60129542144, cb) },
+        { GroupElement(0, cb), GroupElement(33553408, cb), GroupElement(4456448, cb), GroupElement(62277025792, cb) },
+        { GroupElement(0, cb), GroupElement(33553920, cb), GroupElement(2883584, cb), GroupElement(64156073984, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(1572864, cb), GroupElement(65766686720, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(786432, cb), GroupElement(66974646272, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(262144, cb), GroupElement(67779952640, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(68316823552, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(68585259008, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(134217728, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(268435456, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(402653184, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(262144, cb), GroupElement(536870912, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(262144, cb), GroupElement(671088640, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(524288, cb), GroupElement(939524096, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(524288, cb), GroupElement(1207959552, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(786432, cb), GroupElement(1476395008, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(1048576, cb), GroupElement(1879048192, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(1310720, cb), GroupElement(2281701376, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(1572864, cb), GroupElement(2818572288, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(2097152, cb), GroupElement(3355443200, cb) },
+        { GroupElement(0, cb), GroupElement(512, cb), GroupElement(2621440, cb), GroupElement(3892314112, cb) },
+        { GroupElement(0, cb), GroupElement(512, cb), GroupElement(3145728, cb), GroupElement(4697620480, cb) },
+        { GroupElement(0, cb), GroupElement(512, cb), GroupElement(3670016, cb), GroupElement(5368709120, cb) },
+        { GroupElement(0, cb), GroupElement(1024, cb), GroupElement(4456448, cb), GroupElement(6308233216, cb) },
+        { GroupElement(0, cb), GroupElement(1024, cb), GroupElement(5242880, cb), GroupElement(7247757312, cb) },
+        { GroupElement(0, cb), GroupElement(1536, cb), GroupElement(6291456, cb), GroupElement(8321499136, cb) },
+        { GroupElement(0, cb), GroupElement(1536, cb), GroupElement(7340032, cb), GroupElement(9529458688, cb) },
+        { GroupElement(0, cb), GroupElement(2048, cb), GroupElement(8650752, cb), GroupElement(10871635968, cb) },
+        { GroupElement(0, cb), GroupElement(2560, cb), GroupElement(9961472, cb), GroupElement(12213813248, cb) },
+        { GroupElement(0, cb), GroupElement(3072, cb), GroupElement(11534336, cb), GroupElement(13555990528, cb) },
+        { GroupElement(0, cb), GroupElement(3584, cb), GroupElement(13107200, cb), GroupElement(15032385536, cb) },
+        { GroupElement(0, cb), GroupElement(4608, cb), GroupElement(14942208, cb), GroupElement(16642998272, cb) },
+        { GroupElement(0, cb), GroupElement(5120, cb), GroupElement(16777216, cb), GroupElement(18253611008, cb) },
+        { GroupElement(0, cb), GroupElement(6144, cb), GroupElement(18874368, cb), GroupElement(19998441472, cb) },
+        { GroupElement(0, cb), GroupElement(7168, cb), GroupElement(21233664, cb), GroupElement(21877489664, cb) },
+        { GroupElement(1, cb), GroupElement(8192, cb), GroupElement(23592960, cb), GroupElement(23622320128, cb) },
+        { GroupElement(1, cb), GroupElement(9216, cb), GroupElement(25952256, cb), GroupElement(25367150592, cb) },
+        { GroupElement(1, cb), GroupElement(10240, cb), GroupElement(28573696, cb), GroupElement(27111981056, cb) },
+        { GroupElement(1, cb), GroupElement(11776, cb), GroupElement(31195136, cb), GroupElement(28856811520, cb) },
+        { GroupElement(1, cb), GroupElement(13312, cb), GroupElement(33816576, cb), GroupElement(30601641984, cb) },
+        { GroupElement(2, cb), GroupElement(14336, cb), GroupElement(36438016, cb), GroupElement(32078036992, cb) },
+        { GroupElement(2, cb), GroupElement(15872, cb), GroupElement(38797312, cb), GroupElement(33554432000, cb) },
+        { GroupElement(2, cb), GroupElement(17408, cb), GroupElement(41156608, cb), GroupElement(34762391552, cb) },
+        { GroupElement(2, cb), GroupElement(18944, cb), GroupElement(43253760, cb), GroupElement(35836133376, cb) },
+        { GroupElement(3, cb), GroupElement(19968, cb), GroupElement(45088768, cb), GroupElement(36641439744, cb) },
+        { GroupElement(3, cb), GroupElement(20992, cb), GroupElement(46137344, cb), GroupElement(37178310656, cb) },
+        { GroupElement(3, cb), GroupElement(20992, cb), GroupElement(46661632, cb), GroupElement(37312528384, cb) },
+        { GroupElement(3, cb), GroupElement(20480, cb), GroupElement(45875200, cb), GroupElement(37044092928, cb) },
+        { GroupElement(2, cb), GroupElement(18944, cb), GroupElement(44564480, cb), GroupElement(36641439744, cb) },
+        { GroupElement(2, cb), GroupElement(16896, cb), GroupElement(42729472, cb), GroupElement(36104568832, cb) },
+        { GroupElement(1, cb), GroupElement(14848, cb), GroupElement(41156608, cb), GroupElement(35701915648, cb) },
+        { GroupElement(0, cb), GroupElement(12288, cb), GroupElement(39321600, cb), GroupElement(35299262464, cb) },
+        { GroupElement(65535, cb), GroupElement(10240, cb), GroupElement(37748736, cb), GroupElement(34896609280, cb) },
+        { GroupElement(65534, cb), GroupElement(7680, cb), GroupElement(36438016, cb), GroupElement(34762391552, cb) },
+        { GroupElement(65532, cb), GroupElement(5632, cb), GroupElement(35389440, cb), GroupElement(34493956096, cb) },
+        { GroupElement(65531, cb), GroupElement(3584, cb), GroupElement(34340864, cb), GroupElement(34359738368, cb) },
+        { GroupElement(65529, cb), GroupElement(2048, cb), GroupElement(33816576, cb), GroupElement(34359738368, cb) },
+        { GroupElement(65528, cb), GroupElement(512, cb), GroupElement(33554432, cb), GroupElement(34359738368, cb) },
+        { GroupElement(65527, cb), GroupElement(0, cb), GroupElement(33554432, cb), GroupElement(34359738368, cb) },
+        { GroupElement(65526, cb), GroupElement(0, cb), GroupElement(33554432, cb), GroupElement(34225520640, cb) },
+    };
+
+    std::vector<GroupElement> fxd_p 
+    {
+        GroupElement(0, ib),
+        GroupElement(125, ib),
+        GroupElement(218, ib),
+        GroupElement(304, ib),
+        GroupElement(387, ib),
+        GroupElement(469, ib),
+        GroupElement(553, ib),
+        GroupElement(638, ib),
+        GroupElement(726, ib),
+        GroupElement(820, ib),
+        GroupElement(923, ib),
+        GroupElement(1042, ib),
+        GroupElement(1216, ib),
+        GroupElement(1369, ib),
+        GroupElement(1505, ib),
+        GroupElement(1638, ib),
+        GroupElement(1772, ib),
+        GroupElement(1909, ib),
+        GroupElement(2051, ib),
+        GroupElement(2199, ib),
+        GroupElement(2356, ib),
+        GroupElement(2524, ib),
+        GroupElement(2704, ib),
+        GroupElement(2899, ib),
+        GroupElement(3114, ib),
+        GroupElement(3352, ib),
+        GroupElement(3619, ib),
+        GroupElement(3925, ib),
+        GroupElement(4283, ib),
+        GroupElement(4712, ib),
+        GroupElement(5251, ib),
+        GroupElement(5972, ib),
+        GroupElement(-32768, ib),
+        GroupElement(-6344, ib),
+        GroupElement(-5692, ib),
+        GroupElement(-5502, ib),
+        GroupElement(-5313, ib),
+        GroupElement(-5127, ib),
+        GroupElement(-4954, ib),
+        GroupElement(-4783, ib),
+        GroupElement(-4625, ib),
+        GroupElement(-4477, ib),
+        GroupElement(-4327, ib),
+        GroupElement(-4187, ib),
+        GroupElement(-4045, ib),
+        GroupElement(-3913, ib),
+        GroupElement(-3787, ib),
+        GroupElement(-3659, ib),
+        GroupElement(-3538, ib),
+        GroupElement(-3414, ib),
+        GroupElement(-3297, ib),
+        GroupElement(-3185, ib),
+        GroupElement(-3071, ib),
+        GroupElement(-2962, ib),
+        GroupElement(-2858, ib),
+        GroupElement(-2759, ib),
+        GroupElement(-2656, ib),
+        GroupElement(-2557, ib),
+        GroupElement(-2462, ib),
+        GroupElement(-2363, ib),
+        GroupElement(-2268, ib),
+        GroupElement(-2176, ib),
+        GroupElement(-2086, ib),
+        GroupElement(-1992, ib),
+        GroupElement(-1901, ib),
+        GroupElement(-1812, ib),
+        GroupElement(-1724, ib),
+        GroupElement(-1629, ib),
+        GroupElement(-1535, ib),
+        GroupElement(-1439, ib),
+        GroupElement(-1340, ib),
+        GroupElement(-1219, ib),
+        GroupElement(-1070, ib),
+        GroupElement(-970, ib),
+        GroupElement(-878, ib),
+        GroupElement(-794, ib),
+        GroupElement(-716, ib),
+        GroupElement(-641, ib),
+        GroupElement(-569, ib),
+        GroupElement(-499, ib),
+        GroupElement(-423, ib),
+        GroupElement(-347, ib),
+        GroupElement(-270, ib),
+        GroupElement(-189, ib),
+        GroupElement(-101, ib)
+    };
 #else 
     throw std::invalid_argument("no scales selected for sigmoid");    
 #endif
@@ -1205,6 +1386,8 @@ GroupElement evalTanh_main_wrapper(int party, GroupElement x, SplineKeyPack &k)
 std::pair<SplineKeyPack, SplineKeyPack> keyGenInvsqrt_main_wrapper(int Bin, int Bout, int scaleIn, int scaleOut,
                     GroupElement rin, GroupElement rout)
 {
+    int scaleCoef = 13, coefBitsize = 64;
+
     // todo: add other scales
     assert((Bin == 64) && (Bout == 64));
 
@@ -1212,11 +1395,12 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenInvsqrt_main_wrapper(int Bin, int 
     assert((scaleIn == 10) && (scaleOut == 9));
 #elif defined(INVSQRT_12_11)
     assert((scaleIn == 12) && (scaleOut == 11));
+#elif defined(INVSQRT_GROTTO_9_9)
+    scaleCoef = 9;
+    assert((scaleIn == 9) && (scaleOut == 9));
 #else 
     throw std::invalid_argument("no scales selected for invsqrt");
 #endif
-
-    int scaleCoef = 13, coefBitsize = 64;
 
     int ib = Bin, cb = coefBitsize, ob = Bout, sin = scaleIn, scoef = scaleCoef, sout = scaleOut;
     int degree = 2;
@@ -1267,6 +1451,94 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenInvsqrt_main_wrapper(int Bin, int 
     std::vector<GroupElement> fxd_p{/* dummy knot x=0 for consistency */  GroupElement(0, ib),   /* actual spline starts here */   GroupElement(409, ib),     GroupElement(661, ib),     GroupElement(914, ib),    GroupElement(1420, ib),    GroupElement(2431, ib),    GroupElement(4453, ib),    GroupElement(8498, ib),   GroupElement(16588, ib),   GroupElement(32768, ib) /* actual spline ends here  */
     };
   
+#elif defined(INVSQRT_GROTTO_9_9)
+    std::vector<std::vector<GroupElement>> fxd_polynomials 
+    {
+        { GroupElement(59372, cb), GroupElement(26828800, cb), GroupElement(9170845696, cb), GroupElement(3292360867840, cb) },
+        { GroupElement(43958, cb), GroupElement(30216704, cb), GroupElement(14810349568, cb), GroupElement(2336327991296, cb) },
+        { GroupElement(28693, cb), GroupElement(13525504, cb), GroupElement(1156841472, cb), GroupElement(1943741136896, cb) },
+        { GroupElement(15571, cb), GroupElement(15899136, cb), GroupElement(12407799808, cb), GroupElement(1690203848704, cb) },
+        { GroupElement(23791, cb), GroupElement(3635200, cb), GroupElement(14416347136, cb), GroupElement(1562025918464, cb) },
+        { GroupElement(1781, cb), GroupElement(1638400, cb), GroupElement(16973561856, cb), GroupElement(1336808570880, cb) },
+        { GroupElement(48090, cb), GroupElement(2639872, cb), GroupElement(9288286208, cb), GroupElement(1234534662144, cb) },
+        { GroupElement(6606, cb), GroupElement(16313344, cb), GroupElement(10689970176, cb), GroupElement(1136421502976, cb) },
+        { GroupElement(49892, cb), GroupElement(14036480, cb), GroupElement(5082447872, cb), GroupElement(1043005964288, cb) },
+        { GroupElement(2698, cb), GroupElement(16413184, cb), GroupElement(10809245696, cb), GroupElement(954422263808, cb) },
+        { GroupElement(15258, cb), GroupElement(4158464, cb), GroupElement(11466440704, cb), GroupElement(872012578816, cb) },
+        { GroupElement(20367, cb), GroupElement(6629888, cb), GroupElement(8200650752, cb), GroupElement(794703167488, cb) },
+        { GroupElement(35108, cb), GroupElement(6558720, cb), GroupElement(1801453568, cb), GroupElement(722359812096, cb) },
+        { GroupElement(29465, cb), GroupElement(3270656, cb), GroupElement(10049028096, cb), GroupElement(655385165824, cb) },
+        { GroupElement(55229, cb), GroupElement(26493440, cb), GroupElement(16320299008, cb), GroupElement(593376575488, cb) },
+        { GroupElement(20216, cb), GroupElement(29394944, cb), GroupElement(3898343424, cb), GroupElement(535797170176, cb) },
+        { GroupElement(34444, cb), GroupElement(15900160, cb), GroupElement(7489978368, cb), GroupElement(482378514432, cb) },
+        { GroupElement(1119, cb), GroupElement(872448, cb), GroupElement(10167779328, cb), GroupElement(432986390528, cb) },
+        { GroupElement(10624, cb), GroupElement(5576704, cb), GroupElement(12145393664, cb), GroupElement(387755016192, cb) },
+        { GroupElement(10966, cb), GroupElement(22231552, cb), GroupElement(13593739264, cb), GroupElement(346281738240, cb) },
+        { GroupElement(41292, cb), GroupElement(12455424, cb), GroupElement(14646509568, cb), GroupElement(308432338944, cb) },
+        { GroupElement(54990, cb), GroupElement(6873600, cb), GroupElement(15406465024, cb), GroupElement(273804165120, cb) },
+        { GroupElement(61046, cb), GroupElement(3735552, cb), GroupElement(15949627392, cb), GroupElement(242397216768, cb) },
+        { GroupElement(63663, cb), GroupElement(2000384, cb), GroupElement(16334192640, cb), GroupElement(213943058432, cb) },
+        { GroupElement(64771, cb), GroupElement(1055744, cb), GroupElement(16603414528, cb), GroupElement(188307472384, cb) },
+        { GroupElement(65230, cb), GroupElement(548864, cb), GroupElement(16790585344, cb), GroupElement(165222023168, cb) },
+        { GroupElement(65419, cb), GroupElement(276992, cb), GroupElement(16921395200, cb), GroupElement(144149839872, cb) },
+        { GroupElement(65494, cb), GroupElement(133120, cb), GroupElement(17013145600, cb), GroupElement(124554051584, cb) },
+        { GroupElement(65522, cb), GroupElement(62464, cb), GroupElement(17073700864, cb), GroupElement(107105746944, cb) },
+        { GroupElement(65532, cb), GroupElement(28672, cb), GroupElement(17113546752, cb), GroupElement(91670708224, cb) },
+        { GroupElement(65535, cb), GroupElement(12800, cb), GroupElement(17138974720, cb), GroupElement(77980499968, cb) },
+        { GroupElement(0, cb), GroupElement(5120, cb), GroupElement(17154965504, cb), GroupElement(66035122176, cb) },
+        { GroupElement(0, cb), GroupElement(2048, cb), GroupElement(17165189120, cb), GroupElement(55700357120, cb) },
+        { GroupElement(0, cb), GroupElement(512, cb), GroupElement(17171218432, cb), GroupElement(46573551616, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(17174888448, cb), GroupElement(38788923392, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(17177247744, cb), GroupElement(31809601536, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(17178558464, cb), GroupElement(25769803776, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(17179344896, cb), GroupElement(20803747840, cb) },
+        { GroupElement(0, cb), GroupElement(0, cb), GroupElement(0, cb), GroupElement(8727507763200, cb) },
+        { GroupElement(16796, cb), GroupElement(2476544, cb), GroupElement(11361583104, cb), GroupElement(1537329856512, cb) },
+    };
+
+    std::vector<GroupElement> fxd_p 
+    {
+        GroupElement(0, ib),
+        GroupElement(1, ib),
+        GroupElement(2, ib),
+        GroupElement(3, ib),
+        GroupElement(4, ib),
+        GroupElement(5, ib),
+        GroupElement(6, ib),
+        GroupElement(8, ib),
+        GroupElement(9, ib),
+        GroupElement(11, ib),
+        GroupElement(13, ib),
+        GroupElement(16, ib),
+        GroupElement(20, ib),
+        GroupElement(24, ib),
+        GroupElement(29, ib),
+        GroupElement(36, ib),
+        GroupElement(44, ib),
+        GroupElement(55, ib),
+        GroupElement(68, ib),
+        GroupElement(86, ib),
+        GroupElement(108, ib),
+        GroupElement(136, ib),
+        GroupElement(173, ib),
+        GroupElement(222, ib),
+        GroupElement(286, ib),
+        GroupElement(371, ib),
+        GroupElement(483, ib),
+        GroupElement(643, ib),
+        GroupElement(864, ib),
+        GroupElement(1173, ib),
+        GroupElement(1610, ib),
+        GroupElement(2235, ib),
+        GroupElement(3133, ib),
+        GroupElement(4440, ib),
+        GroupElement(6362, ib),
+        GroupElement(9315, ib),
+        GroupElement(14005, ib),
+        GroupElement(21414, ib),
+        GroupElement(-32768, ib),
+        GroupElement(-15, ib)
+    };
 #else 
     throw std::invalid_argument("no scales selected for invsqrt");
 #endif
