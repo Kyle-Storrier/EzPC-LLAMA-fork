@@ -1,3 +1,6 @@
+## Note: This is a modified fork of CrypTFlow
+This repository is a fork of [CrypTFlow](https://github.com/mpc-msri/EzPC) with the LLAMA FSS code modified to use alternative lookup table values.
+
 # LLAMA: A Low Latency Math Library for Secure Inference
 
 Implementation of protocols from the paper [LLAMA](https://eprint.iacr.org/2022/793.pdf).
