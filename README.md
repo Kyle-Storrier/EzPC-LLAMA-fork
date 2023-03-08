@@ -1,3 +1,6 @@
+## Note: This is a modified fork of CrypTFlow
+This repository is a fork of [CrypTFlow](https://github.com/mpc-msri/EzPC) with the FSS code modified to use alternative lookup table values.
+
 # CrypTFlow: An End-to-end System for Secure TensorFlow Inference [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/mpc-msri/EzPC/issues)
 
 **Reference Papers:**  
