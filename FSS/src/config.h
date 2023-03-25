@@ -31,21 +31,21 @@ SOFTWARE.
 // #define SIGMOID_9_14
 // #define SIGMOID_11_14
 // #define SIGMOID_13_14
-// #define SIGMOID_12_12
-#define SIGMOID_GROTTO_9_9
+#define SIGMOID_12_12
+// #define SIGMOID_GROTTO_9_9
 
 /* To use Tanh in (bitlen, scale), uncomment `TANH_bitlen_scale` flag and comment other TANH flags and SIGMOID_TANH_37 flag. */
 // #define TANH_8_8
 // #define TANH_9_9
 // #define TANH_11_11
-// #define TANH_12_12
+#define TANH_12_12
 // #define TANH_13_13
 
 /* To use InvSqrt in (bitlen, scale), uncomment `INVSQRT_bitlen_scale` flag and comment other INVSQRT flags. */
-// #define INVSQRT_10_9
+#define INVSQRT_10_9
 // #define INVSQRT_12_11
-#define INVSQRT_GROTTO_9_9
+// #define INVSQRT_GROTTO_9_9
 
 // #define LOG10_GROTTO_9_9
 // #define SQRT_GROTTO_9_9
-#define TANH_GROTTO_9_9
+// #define TANH_GROTTO_9_9
