@@ -86,6 +86,7 @@ install(FILES
         "pubdiv.h"
         "input_prng.h"
         "config.h"
+        "function_config.hpp"
         DESTINATION include)
 
 install(DIRECTORY
