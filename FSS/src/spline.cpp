@@ -24,10 +24,26 @@ SOFTWARE.
 #include "utils.h"
 #include <assert.h>
 
+#include "function_config.hpp"
+
 
 namespace llama_config {
+
+namespace tanh {
     extern std::vector<std::vector<GroupElement>> fxd_polynomials;
     extern std::vector<GroupElement> fxd_p;
+}
+
+namespace sigmoid {
+    extern std::vector<std::vector<GroupElement>> fxd_polynomials;
+    extern std::vector<GroupElement> fxd_p;
+}
+
+namespace invsqrt {
+    extern std::vector<std::vector<GroupElement>> fxd_polynomials;
+    extern std::vector<GroupElement> fxd_p;
+}
+
 }
 
 std::pair<ReluKeyPack, ReluKeyPack> keyGenRelu(int Bin, int Bout,
@@ -381,10 +397,15 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenSigmoid_main_wrapper(int Bin, int 
 
     int degree = 2;
 
-    int numPoly = llama_config::fxd_polynomials.size(), m = numPoly;
-    llama_config::fxd_p.push_back(GroupElement(-1, ib));
+    // int numPoly = llama_config::sigmoid::fxd_polynomials.size(), m = numPoly;
+    // llama_config::sigmoid::fxd_p.push_back(GroupElement(-1, ib));
 
-    return keyGenSigmoid(ib, ob, numPoly, degree, llama_config::fxd_polynomials, llama_config::fxd_p, rin, rout);
+    // return keyGenSigmoid(ib, ob, numPoly, degree, llama_config::sigmoid::fxd_polynomials, llama_config::sigmoid::fxd_p, rin, rout);
+
+    int numPoly = llama_config::tanh::fxd_polynomials.size(), m = numPoly;
+    llama_config::tanh::fxd_p.push_back(GroupElement(-1, ib));
+
+    return keyGenSigmoid(ib, ob, numPoly, degree, llama_config::tanh::fxd_polynomials, llama_config::tanh::fxd_p, rin, rout);
 }
 
 GroupElement evalSigmoid_main_wrapper(int party, GroupElement x, SplineKeyPack &k)
@@ -743,10 +764,10 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenTanh_main_wrapper(int Bin, int Bou
 //     throw std::invalid_argument("no scales selected for tanh");
 // #endif
 
-    int numPoly = llama_config::fxd_polynomials.size(), m = numPoly;
-    llama_config::fxd_p.push_back(GroupElement(-1, ib));
+    int numPoly = llama_config::tanh::fxd_polynomials.size(), m = numPoly;
+    llama_config::tanh::fxd_p.push_back(GroupElement(-1, ib));
 
-    return keyGenSigmoid(ib, ob, numPoly, degree, llama_config::fxd_polynomials, llama_config::fxd_p, rin, rout);
+    return keyGenSigmoid(ib, ob, numPoly, degree, llama_config::tanh::fxd_polynomials, llama_config::tanh::fxd_p, rin, rout);
 }                    
 
 GroupElement evalTanh_main_wrapper(int party, GroupElement x, SplineKeyPack &k)
@@ -914,10 +935,10 @@ std::pair<SplineKeyPack, SplineKeyPack> keyGenInvsqrt_main_wrapper(int Bin, int 
 //     throw std::invalid_argument("no scales selected for invsqrt");
 // #endif
 
-    int numPoly = llama_config::fxd_polynomials.size(), m = numPoly;
-    llama_config::fxd_p.push_back(GroupElement(-1, ib));
+    int numPoly = llama_config::invsqrt::fxd_polynomials.size(), m = numPoly;
+    llama_config::invsqrt::fxd_p.push_back(GroupElement(-1, ib));
 
-    return keyGenSigmoid(ib, ob, numPoly, degree, llama_config::fxd_polynomials, llama_config::fxd_p, rin, rout);
+    return keyGenSigmoid(ib, ob, numPoly, degree, llama_config::invsqrt::fxd_polynomials, llama_config::invsqrt::fxd_p, rin, rout);
 }
 
 GroupElement evalInvsqrt_main_wrapper(int party, GroupElement x, SplineKeyPack &k)

@@ -35,25 +35,73 @@ SOFTWARE.
 
 // #include "function_config.hpp"
 
-namespace llama_config { 
-extern int sin;
-extern int sout;
+namespace llama_config {
+namespace tanh {
+    extern std::string lut_src;
+    extern int sin;
+    extern int sout;
 
 
-extern int ib, ob;
-extern int cb;
-extern int degree;
-extern int scoef;
-extern int numPoly;
+    extern int ib, ob;
+    extern int cb;
+    extern int degree;
+    extern int scoef;
+    extern int numPoly;
 
-extern int input_precision;
-extern int input_bitwidth;
-extern int output_precision;
-extern int output_bitwidth;
+    extern int input_precision;
+    extern int input_bitwidth;
+    extern int output_precision;
+    extern int output_bitwidth;
 
-extern std::vector<std::vector<GroupElement>> fxd_polynomials;
+    extern std::vector<std::vector<GroupElement>> fxd_polynomials;
 
-extern std::vector<GroupElement> fxd_p;
+    extern std::vector<GroupElement> fxd_p;
+}
+
+namespace sigmoid {
+    extern std::string lut_src;
+    extern int sin;
+    extern int sout;
+
+
+    extern int ib, ob;
+    extern int cb;
+    extern int degree;
+    extern int scoef;
+    extern int numPoly;
+
+    extern int input_precision;
+    extern int input_bitwidth;
+    extern int output_precision;
+    extern int output_bitwidth;
+
+    extern std::vector<std::vector<GroupElement>> fxd_polynomials;
+
+    extern std::vector<GroupElement> fxd_p;
+}
+
+namespace invsqrt {
+    extern std::string lut_src;
+    extern int sin;
+    extern int sout;
+
+
+    extern int ib, ob;
+    extern int cb;
+    extern int degree;
+    extern int scoef;
+    extern int numPoly;
+
+    extern int input_precision;
+    extern int input_bitwidth;
+    extern int output_precision;
+    extern int output_bitwidth;
+
+    extern std::vector<std::vector<GroupElement>> fxd_polynomials;
+
+    extern std::vector<GroupElement> fxd_p;
+}
+
 }
 
 extern int num_threads;
@@ -146,10 +194,19 @@ void finalize()
         std::cerr << "Online Rounds = " << numRounds << "\n";
         std::cerr << "Online Communication = " << peer->bytesSent + peer->bytesReceived + inputOnlineCommVaried << " bytes\n";
         std::cerr << "Online Time = " << (totalTime + accumulatedInputTimeOnline) / 1000.0 << " milliseconds\n\n";
+        // std::cout
+        //     << "Scheme, LUT source, input bitlength, input precision, Number of polynomials, Degree, Online rounds, Online comms (bytes), Bytes sent, Bytes recv, P2 time (us)" << std::endl
+        //     << "LLAMA, " << llama_config::lut_src << ", " << llama_config::ib << ", " << llama_config::sin << ", " << llama_config::numPoly << ", " << llama_config::degree << ", "
+        //     << numRounds << ", " << peer->bytesSent + peer->bytesReceived << ", " << peer->bytesSent << ", " << peer->bytesReceived << ", "
+        //     << (totalTime + accumulatedInputTimeOnline) << std::endl;
     }
     else {
         std::cerr << "Offline Communication = " << server->bytesSent + client->bytesSent << " bytes\n";
         std::cerr << "Offline Time = " << (totalTime + accumulatedInputTimeOffline) / 1000.0 << " milliseconds\n";
+        // std::cout
+        //     << "P2 average precomp (bytes), server precomp (bytes), client precomp (bytes), P2 time (us)" << std::endl
+        //     << (server->bytesSent + client->bytesSent)/2.0 << ", " << server->bytesSent << ", " << client->bytesSent << ", "
+        //     << (totalTime + accumulatedInputTimeOffline) << std::endl;
     }
     std::cerr << "=========\n";
 
@@ -1625,19 +1682,19 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     throw std::invalid_argument("no scales selected for sigmoid");
 #endif
 
-    GroupElement *tmpA = make_ge_array(I*J, llama_config::ib);
+    GroupElement *tmpA = make_ge_array(I*J, llama_config::sigmoid::ib);
     GroupElement *tmpA_mask = party == DEALER ? tmpA : nullptr;
 
-    internalExtend(I*J, bwA, llama_config::ib, A, A_mask, tmpA, tmpA_mask);
+    internalExtend(I*J, bwA, llama_config::sigmoid::ib, A, A_mask, tmpA, tmpA_mask);
 
-    GroupElement *tmpB = make_ge_array(I*J, llama_config::ob);
+    GroupElement *tmpB = make_ge_array(I*J, llama_config::sigmoid::ob);
     GroupElement *tmpB_mask = party == DEALER ? tmpB : nullptr;
 
     if (party == DEALER) {
 #ifdef DEALER_DIRECT_SEND
         for(int i = 0; i < I*J; ++i) {
-            tmpB_mask[i] = random_ge(llama_config::ob);
-            auto keys = keyGenSigmoid_main_wrapper(llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
+            tmpB_mask[i] = random_ge(llama_config::sigmoid::ob);
+            auto keys = keyGenSigmoid_main_wrapper(llama_config::sigmoid::ib, llama_config::sigmoid::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
             server->send_spline_key(keys.first);
             client->send_spline_key(keys.second);
             freeSplineKeyPair(keys);
@@ -1650,7 +1707,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::thread thread_pool[num_threads];
 
         for(int i = 0; i < num_threads; ++i) {
-            thread_pool[i] = std::thread(Sigmoid_dealer_threads_helper, i, size, llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA, tmpB, keys);
+            thread_pool[i] = std::thread(Sigmoid_dealer_threads_helper, i, size, llama_config::sigmoid::ib, llama_config::sigmoid::ob, shift_in, shift_out, tmpA, tmpB, keys);
         }
 
         for(int i = 0; i < num_threads; ++i) {
@@ -1671,7 +1728,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     else {
         SplineKeyPack *keys = new SplineKeyPack[I*J];
         for(int i = 0; i < I*J; ++i) {
-            keys[i] = dealer->recv_spline_key(llama_config::ib, llama_config::ob, llama_config::numPoly, llama_config::degree);
+            keys[i] = dealer->recv_spline_key(llama_config::sigmoid::ib, llama_config::sigmoid::ob, llama_config::sigmoid::numPoly, llama_config::sigmoid::degree);
         }
 
         peer->sync();
@@ -1693,7 +1750,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         peer->sync();
         auto t2 = std::chrono::high_resolution_clock::now();
 
-        reconstruct(I*J, tmpB, llama_config::ob);
+        reconstruct(I*J, tmpB, llama_config::sigmoid::ob);
         auto end = std::chrono::high_resolution_clock::now();
         evaluatorStats.sigmoid += std::chrono::duration_cast<std::chrono::microseconds>(end - t2).count();
         evaluatorStats.sigmoid += std::chrono::duration_cast<std::chrono::microseconds>(t1 - start).count();
@@ -1702,7 +1759,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     }
 
     delete[] tmpA;
-    internalTruncateAndFix(I*J, (llama_config::degree * llama_config::sin + llama_config::scoef - llama_config::sout), llama_config::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
+    internalTruncateAndFix(I*J, (llama_config::sigmoid::degree * llama_config::sigmoid::sin + llama_config::sigmoid::scoef - llama_config::sigmoid::sout), llama_config::sigmoid::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
     delete[] tmpB;
 }
 
@@ -1779,19 +1836,19 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     throw std::invalid_argument("no scales selected for tanh");
 #endif
 
-    GroupElement *tmpA = make_ge_array(I*J, llama_config::ib);
+    GroupElement *tmpA = make_ge_array(I*J, llama_config::tanh::ib);
     GroupElement *tmpA_mask = party == DEALER ? tmpA : nullptr;
 
-    internalExtend(I*J, bwA, llama_config::ib, A, A_mask, tmpA, tmpA_mask);
+    internalExtend(I*J, bwA, llama_config::tanh::ib, A, A_mask, tmpA, tmpA_mask);
 
-    GroupElement *tmpB = make_ge_array(I*J, llama_config::ob);
+    GroupElement *tmpB = make_ge_array(I*J, llama_config::tanh::ob);
     GroupElement *tmpB_mask = party == DEALER ? tmpB : nullptr;
 
     if (party == DEALER) {
 #ifdef DEALER_DIRECT_SEND
         for(int i = 0; i < I*J; ++i) {
-            tmpB_mask[i] = random_ge(llama_config::ob);
-            auto keys = keyGenTanh_main_wrapper(llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
+            tmpB_mask[i] = random_ge(llama_config::tanh::ob);
+            auto keys = keyGenTanh_main_wrapper(llama_config::tanh::ib, llama_config::tanh::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
             server->send_spline_key(keys.first);
             client->send_spline_key(keys.second);
             freeSplineKeyPair(keys);
@@ -1804,7 +1861,7 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::thread thread_pool[num_threads];
 
         for(int i = 0; i < num_threads; ++i) {
-            thread_pool[i] = std::thread(Tanh_dealer_threads_helper, i, size, llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA, tmpB, keys);
+            thread_pool[i] = std::thread(Tanh_dealer_threads_helper, i, size, llama_config::tanh::ib, llama_config::tanh::ob, shift_in, shift_out, tmpA, tmpB, keys);
         }
 
         for(int i = 0; i < num_threads; ++i) {
@@ -1825,7 +1882,7 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     else {
         SplineKeyPack *keys = new SplineKeyPack[I*J];
         for(int i = 0; i < I*J; ++i) {
-            keys[i] = dealer->recv_spline_key(llama_config::ib, llama_config::ob, llama_config::numPoly, llama_config::degree);
+            keys[i] = dealer->recv_spline_key(llama_config::tanh::ib, llama_config::tanh::ob, llama_config::tanh::numPoly, llama_config::tanh::degree);
         }
 
         peer->sync();
@@ -1847,7 +1904,7 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         peer->sync();
         auto t2 = std::chrono::high_resolution_clock::now();
 
-        reconstruct(I*J, tmpB, llama_config::ob);
+        reconstruct(I*J, tmpB, llama_config::tanh::ob);
 
         auto end = std::chrono::high_resolution_clock::now();
         evaluatorStats.tanh += std::chrono::duration_cast<std::chrono::microseconds>(end - t2).count();
@@ -1856,8 +1913,31 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     }
 
     delete[] tmpA;
-    internalTruncateAndFix(I*J, (llama_config::degree * llama_config::sin + llama_config::scoef - llama_config::sout), llama_config::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
+    internalTruncateAndFix(I*J, (llama_config::tanh::degree * llama_config::tanh::sin + llama_config::tanh::scoef - llama_config::tanh::sout), llama_config::tanh::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
     delete[] tmpB;
+
+    auto totalTime = evaluatorStats.truncateFix + evaluatorStats.scalarMul + evaluatorStats.matmul + evaluatorStats.matadd + evaluatorStats.mulcir + evaluatorStats.matbroadcast + evaluatorStats.shiftleft + evaluatorStats.sigmoid + evaluatorStats.tanh + evaluatorStats.argmax + evaluatorStats.sqrt;
+
+    if (party != DEALER) {
+        std::cerr << "Offline Communication = " << inputOfflineCommVaried << " bytes\n";
+        std::cerr << "Offline Time = " << (accumulatedInputTimeOffline + matmulOfflineTime) / 1000.0 << " milliseconds\n";
+        std::cerr << "Online Rounds = " << numRounds << "\n";
+        std::cerr << "Online Communication = " << peer->bytesSent + peer->bytesReceived + inputOnlineCommVaried << " bytes\n";
+        std::cerr << "Online Time = " << (totalTime + accumulatedInputTimeOnline) / 1000.0 << " milliseconds\n\n";
+        std::cout
+            << "Scheme, LUT source, input bitlength, input precision, Number of polynomials, Degree, Online rounds, Online comms (bytes), Bytes sent, Bytes recv, P2 time (us)" << std::endl
+            << "LLAMA, " << llama_config::tanh::lut_src << ", " << llama_config::tanh::ib << ", " << llama_config::tanh::sin << ", " << llama_config::tanh::numPoly << ", " << llama_config::tanh::degree << ", "
+            << numRounds << ", " << peer->bytesSent + peer->bytesReceived << ", " << peer->bytesSent << ", " << peer->bytesReceived << ", "
+            << (totalTime + accumulatedInputTimeOnline) << std::endl;
+    }
+    else {
+        std::cerr << "Offline Communication = " << server->bytesSent + client->bytesSent << " bytes\n";
+        std::cerr << "Offline Time = " << (totalTime + accumulatedInputTimeOffline) / 1000.0 << " milliseconds\n";
+        std::cout
+            << "P2 average precomp (bytes), server precomp (bytes), client precomp (bytes), P2 time (us)" << std::endl
+            << (server->bytesSent + client->bytesSent)/2.0 << ", " << server->bytesSent << ", " << client->bytesSent << ", "
+            << (totalTime + accumulatedInputTimeOffline) << std::endl;
+    }
 }
 
 void Invsqrt_threads_helper(int thread_idx, int size, GroupElement *A, GroupElement *tmpB, SplineKeyPack *keys)
@@ -1919,19 +1999,19 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     throw std::invalid_argument("no scales selected for invsqrt");
 #endif
 
-    GroupElement *tmpA = make_ge_array(I*J, llama_config::ib);
+    GroupElement *tmpA = make_ge_array(I*J, llama_config::invsqrt::ib);
     GroupElement *tmpA_mask = party == DEALER ? tmpA : nullptr;
 
-    internalExtend(I*J, bwA, llama_config::ib, A, A_mask, tmpA, tmpA_mask);
+    internalExtend(I*J, bwA, llama_config::invsqrt::ib, A, A_mask, tmpA, tmpA_mask);
 
-    GroupElement *tmpB = make_ge_array(I*J, llama_config::ob);
+    GroupElement *tmpB = make_ge_array(I*J, llama_config::invsqrt::ob);
     GroupElement *tmpB_mask = party == DEALER ? tmpB : nullptr;
 
     if (party == DEALER) {
 #ifdef DEALER_DIRECT_SEND
         for(int i = 0; i < I*J; ++i) {
-            tmpB_mask[i] = random_ge(llama_config::ob);
-            auto keys = keyGenInvsqrt_main_wrapper(llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
+            tmpB_mask[i] = random_ge(llama_config::invsqrt::ob);
+            auto keys = keyGenInvsqrt_main_wrapper(llama_config::invsqrt::ib, llama_config::invsqrt::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
             server->send_spline_key(keys.first);
             client->send_spline_key(keys.second);
             freeSplineKeyPair(keys);
@@ -1944,7 +2024,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::thread thread_pool[num_threads];
 
         for(int i = 0; i < num_threads; ++i) {
-            thread_pool[i] = std::thread(Invsqrt_dealer_threads_helper, i, size, llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA, tmpB, keys);
+            thread_pool[i] = std::thread(Invsqrt_dealer_threads_helper, i, size, llama_config::invsqrt::ib, llama_config::invsqrt::ob, shift_in, shift_out, tmpA, tmpB, keys);
         }
 
         for(int i = 0; i < num_threads; ++i) {
@@ -1965,7 +2045,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     else {
         SplineKeyPack *keys = new SplineKeyPack[I*J];
         for(int i = 0; i < I*J; ++i) {
-            keys[i] = dealer->recv_spline_key(llama_config::ib, llama_config::ob, llama_config::numPoly, llama_config::degree);
+            keys[i] = dealer->recv_spline_key(llama_config::invsqrt::ib, llama_config::invsqrt::ob, llama_config::invsqrt::numPoly, llama_config::invsqrt::degree);
         }
 
         peer->sync();
@@ -1987,7 +2067,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         peer->sync();
         auto t2 = std::chrono::high_resolution_clock::now();
 
-        reconstruct(I*J, tmpB, llama_config::ob);
+        reconstruct(I*J, tmpB, llama_config::invsqrt::ob);
         auto end = std::chrono::high_resolution_clock::now();
         evaluatorStats.sqrt += std::chrono::duration_cast<std::chrono::microseconds>(end - t2).count();
         evaluatorStats.sqrt += std::chrono::duration_cast<std::chrono::microseconds>(t1 - start).count();
@@ -1996,7 +2076,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     }
 
     delete[] tmpA;
-    internalTruncateAndFix(I*J, (llama_config::degree * llama_config::sin + llama_config::scoef - llama_config::sout), llama_config::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
+    internalTruncateAndFix(I*J, (llama_config::invsqrt::degree * llama_config::invsqrt::sin + llama_config::invsqrt::scoef - llama_config::invsqrt::sout), llama_config::invsqrt::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
     delete[] tmpB;
 }
 
