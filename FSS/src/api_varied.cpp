@@ -36,7 +36,6 @@ SOFTWARE.
 // #include "function_config.hpp"
 
 namespace llama_config {
-namespace tanh {
     extern std::string lut_src;
     extern int sin;
     extern int sout;
@@ -56,52 +55,6 @@ namespace tanh {
     extern std::vector<std::vector<GroupElement>> fxd_polynomials;
 
     extern std::vector<GroupElement> fxd_p;
-}
-
-namespace sigmoid {
-    extern std::string lut_src;
-    extern int sin;
-    extern int sout;
-
-
-    extern int ib, ob;
-    extern int cb;
-    extern int degree;
-    extern int scoef;
-    extern int numPoly;
-
-    extern int input_precision;
-    extern int input_bitwidth;
-    extern int output_precision;
-    extern int output_bitwidth;
-
-    extern std::vector<std::vector<GroupElement>> fxd_polynomials;
-
-    extern std::vector<GroupElement> fxd_p;
-}
-
-namespace invsqrt {
-    extern std::string lut_src;
-    extern int sin;
-    extern int sout;
-
-
-    extern int ib, ob;
-    extern int cb;
-    extern int degree;
-    extern int scoef;
-    extern int numPoly;
-
-    extern int input_precision;
-    extern int input_bitwidth;
-    extern int output_precision;
-    extern int output_bitwidth;
-
-    extern std::vector<std::vector<GroupElement>> fxd_polynomials;
-
-    extern std::vector<GroupElement> fxd_p;
-}
-
 }
 
 extern int num_threads;
@@ -1650,51 +1603,53 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     int32_t shift_out = log(scale_out);
 
 
-#ifdef SIGMOID_TANH_37
-    always_assert(shift_in == 12);
-    always_assert(shift_out == 12);
-    // int ib = 64, ob = 64, /*sin = 12, scoef = 20, sout = 12, degree = 2,*/ numPoly = 20;
-#elif defined(SIGMOID_12_12)
-    always_assert(shift_in == 12);
-    always_assert(shift_out == 12);
-    // int ib = 64, ob = 64, /*sin = 12, scoef = 20, sout = 12,*/ degree = 2, numPoly = 19;
-#elif defined(SIGMOID_9_14)
-    always_assert(shift_in == 9);
-    always_assert(shift_out == 14);
-    // int ib = 64, ob = 64, /*sin = 9, scoef = 20, sout = 14,*/ degree = 2, numPoly = 34;
-#elif defined(SIGMOID_8_14)
-    always_assert(shift_in == 8);
-    always_assert(shift_out == 14);
-    // int ib = 64, ob = 64, /*sin = 8, scoef = 20, sout = 14,*/ degree = 2, numPoly = 34;
-#elif defined(SIGMOID_11_14)
-    always_assert(shift_in == 11);
-    always_assert(shift_out == 14);
-    // int ib = 64, ob = 64, /*sin = 11, scoef = 20, sout = 14,*/ degree = 2, numPoly = 34;
-#elif defined(SIGMOID_13_14)
-    always_assert(shift_in == 13);
-    always_assert(shift_out == 14);
-    // int ib = 64, ob = 64, /*sin = 13, scoef = 20, sout = 14,*/ degree = 2, numPoly = 29;
-#elif defined(SIGMOID_GROTTO_9_9)
-    always_assert(shift_in == 9);
-    always_assert(shift_out == 9);
-    // int ib = 64, ob = 64, /*sin = 9, scoef = 9, sout = 9,*/ degree = 3, numPoly = 85;
-#else 
-    throw std::invalid_argument("no scales selected for sigmoid");
-#endif
+    always_assert(shift_in == llama_config::input_precision);
+    always_assert(shift_out == llama_config::output_precision);
+// #ifdef SIGMOID_TANH_37
+//     always_assert(shift_in == 12);
+//     always_assert(shift_out == 12);
+//     // int ib = 64, ob = 64, /*sin = 12, scoef = 20, sout = 12, degree = 2,*/ numPoly = 20;
+// #elif defined(SIGMOID_12_12)
+//     always_assert(shift_in == 12);
+//     always_assert(shift_out == 12);
+//     // int ib = 64, ob = 64, /*sin = 12, scoef = 20, sout = 12,*/ degree = 2, numPoly = 19;
+// #elif defined(SIGMOID_9_14)
+//     always_assert(shift_in == 9);
+//     always_assert(shift_out == 14);
+//     // int ib = 64, ob = 64, /*sin = 9, scoef = 20, sout = 14,*/ degree = 2, numPoly = 34;
+// #elif defined(SIGMOID_8_14)
+//     always_assert(shift_in == 8);
+//     always_assert(shift_out == 14);
+//     // int ib = 64, ob = 64, /*sin = 8, scoef = 20, sout = 14,*/ degree = 2, numPoly = 34;
+// #elif defined(SIGMOID_11_14)
+//     always_assert(shift_in == 11);
+//     always_assert(shift_out == 14);
+//     // int ib = 64, ob = 64, /*sin = 11, scoef = 20, sout = 14,*/ degree = 2, numPoly = 34;
+// #elif defined(SIGMOID_13_14)
+//     always_assert(shift_in == 13);
+//     always_assert(shift_out == 14);
+//     // int ib = 64, ob = 64, /*sin = 13, scoef = 20, sout = 14,*/ degree = 2, numPoly = 29;
+// #elif defined(SIGMOID_GROTTO_9_9)
+//     always_assert(shift_in == 9);
+//     always_assert(shift_out == 9);
+//     // int ib = 64, ob = 64, /*sin = 9, scoef = 9, sout = 9,*/ degree = 3, numPoly = 85;
+// #else 
+//     throw std::invalid_argument("no scales selected for sigmoid");
+// #endif
 
-    GroupElement *tmpA = make_ge_array(I*J, llama_config::sigmoid::ib);
+    GroupElement *tmpA = make_ge_array(I*J, llama_config::ib);
     GroupElement *tmpA_mask = party == DEALER ? tmpA : nullptr;
 
-    internalExtend(I*J, bwA, llama_config::sigmoid::ib, A, A_mask, tmpA, tmpA_mask);
+    internalExtend(I*J, bwA, llama_config::ib, A, A_mask, tmpA, tmpA_mask);
 
-    GroupElement *tmpB = make_ge_array(I*J, llama_config::sigmoid::ob);
+    GroupElement *tmpB = make_ge_array(I*J, llama_config::ob);
     GroupElement *tmpB_mask = party == DEALER ? tmpB : nullptr;
 
     if (party == DEALER) {
 #ifdef DEALER_DIRECT_SEND
         for(int i = 0; i < I*J; ++i) {
-            tmpB_mask[i] = random_ge(llama_config::sigmoid::ob);
-            auto keys = keyGenSigmoid_main_wrapper(llama_config::sigmoid::ib, llama_config::sigmoid::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
+            tmpB_mask[i] = random_ge(llama_config::ob);
+            auto keys = keyGenSigmoid_main_wrapper(llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
             server->send_spline_key(keys.first);
             client->send_spline_key(keys.second);
             freeSplineKeyPair(keys);
@@ -1707,7 +1662,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::thread thread_pool[num_threads];
 
         for(int i = 0; i < num_threads; ++i) {
-            thread_pool[i] = std::thread(Sigmoid_dealer_threads_helper, i, size, llama_config::sigmoid::ib, llama_config::sigmoid::ob, shift_in, shift_out, tmpA, tmpB, keys);
+            thread_pool[i] = std::thread(Sigmoid_dealer_threads_helper, i, size, llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA, tmpB, keys);
         }
 
         for(int i = 0; i < num_threads; ++i) {
@@ -1728,7 +1683,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     else {
         SplineKeyPack *keys = new SplineKeyPack[I*J];
         for(int i = 0; i < I*J; ++i) {
-            keys[i] = dealer->recv_spline_key(llama_config::sigmoid::ib, llama_config::sigmoid::ob, llama_config::sigmoid::numPoly, llama_config::sigmoid::degree);
+            keys[i] = dealer->recv_spline_key(llama_config::ib, llama_config::ob, llama_config::numPoly, llama_config::degree);
         }
 
         peer->sync();
@@ -1750,7 +1705,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         peer->sync();
         auto t2 = std::chrono::high_resolution_clock::now();
 
-        reconstruct(I*J, tmpB, llama_config::sigmoid::ob);
+        reconstruct(I*J, tmpB, llama_config::ob);
         auto end = std::chrono::high_resolution_clock::now();
         evaluatorStats.sigmoid += std::chrono::duration_cast<std::chrono::microseconds>(end - t2).count();
         evaluatorStats.sigmoid += std::chrono::duration_cast<std::chrono::microseconds>(t1 - start).count();
@@ -1759,7 +1714,7 @@ void Sigmoid(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     }
 
     delete[] tmpA;
-    internalTruncateAndFix(I*J, (llama_config::sigmoid::degree * llama_config::sigmoid::sin + llama_config::sigmoid::scoef - llama_config::sigmoid::sout), llama_config::sigmoid::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
+    internalTruncateAndFix(I*J, (llama_config::degree * llama_config::sin + llama_config::scoef - llama_config::sout), llama_config::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
     delete[] tmpB;
 }
 
@@ -1807,48 +1762,51 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
 
     int32_t shift_in = log(scale_in);
     int32_t shift_out = log(scale_out);
-#if defined(TANH_12_12) || defined(SIGMOID_TANH_37)
-// same spline for both cases for tanh
-    always_assert(shift_in == 12);
-    always_assert(shift_out == 12);
-    // int ib = 64, ob = 64, /*sin = 12, scoef = 18, sout = 12,*/ degree = 2, numPoly = 26;
-#elif defined(TANH_9_9)
-    always_assert(shift_in == 9);
-    always_assert(shift_out == 9);
-    // int ib = 64, ob = 64, /*sin = 9, scoef = 18, sout = 9,*/ degree = 2, numPoly = 12;
-#elif defined(TANH_8_8)
-    always_assert(shift_in == 8);
-    always_assert(shift_out == 8);
-    // int ib = 64, ob = 64, /*sin = 8, scoef = 18, sout = 8,*/ degree = 2, numPoly = 10;
-#elif defined(TANH_11_11)
-    always_assert(shift_in == 11);
-    always_assert(shift_out == 11);
-    // int ib = 64, ob = 64, /*sin = 11, scoef = 18, sout = 11,*/ degree = 2, numPoly = 20;
-#elif defined(TANH_13_13)
-    always_assert(shift_in == 13);
-    always_assert(shift_out == 13);
-    // int ib = 64, ob = 64, /*sin = 13, scoef = 18, sout = 13,*/ degree = 2, numPoly = 12;
-#elif defined(TANH_GROTTO_9_9)
-    always_assert(shift_in == 9);
-    always_assert(shift_out == 9);
-    // int ib = 64, ob = 64, /*sin = 9, scoef = 9, sout = 9,*/ degree = 3, numPoly = 20; // TODO: Verify these numbers
-#else 
-    throw std::invalid_argument("no scales selected for tanh");
-#endif
 
-    GroupElement *tmpA = make_ge_array(I*J, llama_config::tanh::ib);
+    always_assert(shift_in == llama_config::input_precision);
+    always_assert(shift_out == llama_config::output_precision);
+// #if defined(TANH_12_12) || defined(SIGMOID_TANH_37)
+// // same spline for both cases for tanh
+//     always_assert(shift_in == 12);
+//     always_assert(shift_out == 12);
+//     // int ib = 64, ob = 64, /*sin = 12, scoef = 18, sout = 12,*/ degree = 2, numPoly = 26;
+// #elif defined(TANH_9_9)
+//     always_assert(shift_in == 9);
+//     always_assert(shift_out == 9);
+//     // int ib = 64, ob = 64, /*sin = 9, scoef = 18, sout = 9,*/ degree = 2, numPoly = 12;
+// #elif defined(TANH_8_8)
+//     always_assert(shift_in == 8);
+//     always_assert(shift_out == 8);
+//     // int ib = 64, ob = 64, /*sin = 8, scoef = 18, sout = 8,*/ degree = 2, numPoly = 10;
+// #elif defined(TANH_11_11)
+//     always_assert(shift_in == 11);
+//     always_assert(shift_out == 11);
+//     // int ib = 64, ob = 64, /*sin = 11, scoef = 18, sout = 11,*/ degree = 2, numPoly = 20;
+// #elif defined(TANH_13_13)
+//     always_assert(shift_in == 13);
+//     always_assert(shift_out == 13);
+//     // int ib = 64, ob = 64, /*sin = 13, scoef = 18, sout = 13,*/ degree = 2, numPoly = 12;
+// #elif defined(TANH_GROTTO_9_9)
+//     always_assert(shift_in == 9);
+//     always_assert(shift_out == 9);
+//     // int ib = 64, ob = 64, /*sin = 9, scoef = 9, sout = 9,*/ degree = 3, numPoly = 20; // TODO: Verify these numbers
+// #else 
+//     throw std::invalid_argument("no scales selected for tanh");
+// #endif
+
+    GroupElement *tmpA = make_ge_array(I*J, llama_config::ib);
     GroupElement *tmpA_mask = party == DEALER ? tmpA : nullptr;
 
-    internalExtend(I*J, bwA, llama_config::tanh::ib, A, A_mask, tmpA, tmpA_mask);
+    internalExtend(I*J, bwA, llama_config::ib, A, A_mask, tmpA, tmpA_mask);
 
-    GroupElement *tmpB = make_ge_array(I*J, llama_config::tanh::ob);
+    GroupElement *tmpB = make_ge_array(I*J, llama_config::ob);
     GroupElement *tmpB_mask = party == DEALER ? tmpB : nullptr;
 
     if (party == DEALER) {
 #ifdef DEALER_DIRECT_SEND
         for(int i = 0; i < I*J; ++i) {
-            tmpB_mask[i] = random_ge(llama_config::tanh::ob);
-            auto keys = keyGenTanh_main_wrapper(llama_config::tanh::ib, llama_config::tanh::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
+            tmpB_mask[i] = random_ge(llama_config::ob);
+            auto keys = keyGenTanh_main_wrapper(llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
             server->send_spline_key(keys.first);
             client->send_spline_key(keys.second);
             freeSplineKeyPair(keys);
@@ -1861,7 +1819,7 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::thread thread_pool[num_threads];
 
         for(int i = 0; i < num_threads; ++i) {
-            thread_pool[i] = std::thread(Tanh_dealer_threads_helper, i, size, llama_config::tanh::ib, llama_config::tanh::ob, shift_in, shift_out, tmpA, tmpB, keys);
+            thread_pool[i] = std::thread(Tanh_dealer_threads_helper, i, size, llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA, tmpB, keys);
         }
 
         for(int i = 0; i < num_threads; ++i) {
@@ -1882,7 +1840,7 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     else {
         SplineKeyPack *keys = new SplineKeyPack[I*J];
         for(int i = 0; i < I*J; ++i) {
-            keys[i] = dealer->recv_spline_key(llama_config::tanh::ib, llama_config::tanh::ob, llama_config::tanh::numPoly, llama_config::tanh::degree);
+            keys[i] = dealer->recv_spline_key(llama_config::ib, llama_config::ob, llama_config::numPoly, llama_config::degree);
         }
 
         peer->sync();
@@ -1904,7 +1862,7 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         peer->sync();
         auto t2 = std::chrono::high_resolution_clock::now();
 
-        reconstruct(I*J, tmpB, llama_config::tanh::ob);
+        reconstruct(I*J, tmpB, llama_config::ob);
 
         auto end = std::chrono::high_resolution_clock::now();
         evaluatorStats.tanh += std::chrono::duration_cast<std::chrono::microseconds>(end - t2).count();
@@ -1913,7 +1871,7 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     }
 
     delete[] tmpA;
-    internalTruncateAndFix(I*J, (llama_config::tanh::degree * llama_config::tanh::sin + llama_config::tanh::scoef - llama_config::tanh::sout), llama_config::tanh::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
+    internalTruncateAndFix(I*J, (llama_config::degree * llama_config::sin + llama_config::scoef - llama_config::sout), llama_config::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
     delete[] tmpB;
 
     auto totalTime = evaluatorStats.truncateFix + evaluatorStats.scalarMul + evaluatorStats.matmul + evaluatorStats.matadd + evaluatorStats.mulcir + evaluatorStats.matbroadcast + evaluatorStats.shiftleft + evaluatorStats.sigmoid + evaluatorStats.tanh + evaluatorStats.argmax + evaluatorStats.sqrt;
@@ -1925,8 +1883,8 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::cerr << "Online Communication = " << peer->bytesSent + peer->bytesReceived + inputOnlineCommVaried << " bytes\n";
         std::cerr << "Online Time = " << (totalTime + accumulatedInputTimeOnline) / 1000.0 << " milliseconds\n\n";
         std::cout
-            << "Scheme, LUT source, input bitlength, input precision, Number of polynomials, Degree, Online rounds, Online comms (bytes), Bytes sent, Bytes recv, P2 time (us)" << std::endl
-            << "LLAMA, " << llama_config::tanh::lut_src << ", " << llama_config::tanh::ib << ", " << llama_config::tanh::sin << ", " << llama_config::tanh::numPoly << ", " << llama_config::tanh::degree << ", "
+            << "Scheme, LUT source, input bitlength, input precision, Number of polynomials, Degree, Online rounds, Online comms (bytes), Bytes sent, Bytes recv, Online time (us)" << std::endl
+            << "LLAMA, " << llama_config::lut_src << ", " << llama_config::ib << ", " << llama_config::sin << ", " << llama_config::numPoly << ", " << llama_config::degree << ", "
             << numRounds << ", " << peer->bytesSent + peer->bytesReceived << ", " << peer->bytesSent << ", " << peer->bytesReceived << ", "
             << (totalTime + accumulatedInputTimeOnline) << std::endl;
     }
@@ -1982,36 +1940,37 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     int32_t shift_out = log(scale_out);
 
     
+    always_assert(shift_in == llama_config::input_precision);
+    always_assert(shift_out == llama_config::output_precision);
+// #ifdef INVSQRT_10_9
+//     always_assert(shift_in == 10);
+//     always_assert(shift_out == 9);
+//     // int ib = 64, ob = 64, /*sin = 10, scoef = 13, sout = 9,*/ degree = 2, numPoly = 10;
+// #elif defined(INVSQRT_12_11)
+//     always_assert(shift_in == 12);
+//     always_assert(shift_out == 11);
+//     // int ib = 64, ob = 64, /*sin = 12, scoef = 13, sout = 11,*/ degree = 2, numPoly = 10;
+// #elif defined(INVSQRT_GROTTO_9_9)
+//     always_assert(shift_in == 9);
+//     always_assert(shift_out == 9);
+//     // int ib = 64, ob = 64, /*sin = 9, scoef = 9, sout = 9,*/ degree = 3, numPoly = 40;
+// #else
+//     throw std::invalid_argument("no scales selected for invsqrt");
+// #endif
 
-#ifdef INVSQRT_10_9
-    always_assert(shift_in == 10);
-    always_assert(shift_out == 9);
-    // int ib = 64, ob = 64, /*sin = 10, scoef = 13, sout = 9,*/ degree = 2, numPoly = 10;
-#elif defined(INVSQRT_12_11)
-    always_assert(shift_in == 12);
-    always_assert(shift_out == 11);
-    // int ib = 64, ob = 64, /*sin = 12, scoef = 13, sout = 11,*/ degree = 2, numPoly = 10;
-#elif defined(INVSQRT_GROTTO_9_9)
-    always_assert(shift_in == 9);
-    always_assert(shift_out == 9);
-    // int ib = 64, ob = 64, /*sin = 9, scoef = 9, sout = 9,*/ degree = 3, numPoly = 40;
-#else
-    throw std::invalid_argument("no scales selected for invsqrt");
-#endif
-
-    GroupElement *tmpA = make_ge_array(I*J, llama_config::invsqrt::ib);
+    GroupElement *tmpA = make_ge_array(I*J, llama_config::ib);
     GroupElement *tmpA_mask = party == DEALER ? tmpA : nullptr;
 
-    internalExtend(I*J, bwA, llama_config::invsqrt::ib, A, A_mask, tmpA, tmpA_mask);
+    internalExtend(I*J, bwA, llama_config::ib, A, A_mask, tmpA, tmpA_mask);
 
-    GroupElement *tmpB = make_ge_array(I*J, llama_config::invsqrt::ob);
+    GroupElement *tmpB = make_ge_array(I*J, llama_config::ob);
     GroupElement *tmpB_mask = party == DEALER ? tmpB : nullptr;
 
     if (party == DEALER) {
 #ifdef DEALER_DIRECT_SEND
         for(int i = 0; i < I*J; ++i) {
-            tmpB_mask[i] = random_ge(llama_config::invsqrt::ob);
-            auto keys = keyGenInvsqrt_main_wrapper(llama_config::invsqrt::ib, llama_config::invsqrt::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
+            tmpB_mask[i] = random_ge(llama_config::ob);
+            auto keys = keyGenInvsqrt_main_wrapper(llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA_mask[i], tmpB_mask[i]);
             server->send_spline_key(keys.first);
             client->send_spline_key(keys.second);
             freeSplineKeyPair(keys);
@@ -2024,7 +1983,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::thread thread_pool[num_threads];
 
         for(int i = 0; i < num_threads; ++i) {
-            thread_pool[i] = std::thread(Invsqrt_dealer_threads_helper, i, size, llama_config::invsqrt::ib, llama_config::invsqrt::ob, shift_in, shift_out, tmpA, tmpB, keys);
+            thread_pool[i] = std::thread(Invsqrt_dealer_threads_helper, i, size, llama_config::ib, llama_config::ob, shift_in, shift_out, tmpA, tmpB, keys);
         }
 
         for(int i = 0; i < num_threads; ++i) {
@@ -2045,7 +2004,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     else {
         SplineKeyPack *keys = new SplineKeyPack[I*J];
         for(int i = 0; i < I*J; ++i) {
-            keys[i] = dealer->recv_spline_key(llama_config::invsqrt::ib, llama_config::invsqrt::ob, llama_config::invsqrt::numPoly, llama_config::invsqrt::degree);
+            keys[i] = dealer->recv_spline_key(llama_config::ib, llama_config::ob, llama_config::numPoly, llama_config::degree);
         }
 
         peer->sync();
@@ -2067,7 +2026,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         peer->sync();
         auto t2 = std::chrono::high_resolution_clock::now();
 
-        reconstruct(I*J, tmpB, llama_config::invsqrt::ob);
+        reconstruct(I*J, tmpB, llama_config::ob);
         auto end = std::chrono::high_resolution_clock::now();
         evaluatorStats.sqrt += std::chrono::duration_cast<std::chrono::microseconds>(end - t2).count();
         evaluatorStats.sqrt += std::chrono::duration_cast<std::chrono::microseconds>(t1 - start).count();
@@ -2076,7 +2035,7 @@ void Sqrt(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
     }
 
     delete[] tmpA;
-    internalTruncateAndFix(I*J, (llama_config::invsqrt::degree * llama_config::invsqrt::sin + llama_config::invsqrt::scoef - llama_config::invsqrt::sout), llama_config::invsqrt::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
+    internalTruncateAndFix(I*J, (llama_config::degree * llama_config::sin + llama_config::scoef - llama_config::sout), llama_config::ob, bwB, tmpB, tmpB_mask, B, B_mask, true);
     delete[] tmpB;
 }
 
