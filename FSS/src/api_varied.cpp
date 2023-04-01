@@ -36,6 +36,8 @@ SOFTWARE.
 // #include "function_config.hpp"
 
 namespace llama_config {
+    extern std::string function_id;
+    extern std::string function_name;
     extern std::string lut_src;
     extern int sin;
     extern int sout;
@@ -149,8 +151,8 @@ void finalize()
         std::cerr << "Online Time = " << (totalTime + accumulatedInputTimeOnline) / 1000.0 << " milliseconds\n\n";
         // std::cout
         //     << "Scheme, LUT source, input bitlength, input precision, Number of polynomials, Degree, Online rounds, Online comms (bytes), Bytes sent, Bytes recv, P2 time (us)" << std::endl
-        //     << "LLAMA, " << llama_config::lut_src << ", " << llama_config::ib << ", " << llama_config::sin << ", " << llama_config::numPoly << ", " << llama_config::degree << ", "
-        //     << numRounds << ", " << peer->bytesSent + peer->bytesReceived << ", " << peer->bytesSent << ", " << peer->bytesReceived << ", "
+        //     << "LLAMA, " << llama_config::lut_src << ',' << llama_config::ib << ',' << llama_config::sin << ',' << llama_config::numPoly << ',' << llama_config::degree << ','
+        //     << numRounds << ',' << peer->bytesSent + peer->bytesReceived << ',' << peer->bytesSent << ',' << peer->bytesReceived << ','
         //     << (totalTime + accumulatedInputTimeOnline) << std::endl;
     }
     else {
@@ -158,7 +160,7 @@ void finalize()
         std::cerr << "Offline Time = " << (totalTime + accumulatedInputTimeOffline) / 1000.0 << " milliseconds\n";
         // std::cout
         //     << "P2 average precomp (bytes), server precomp (bytes), client precomp (bytes), P2 time (us)" << std::endl
-        //     << (server->bytesSent + client->bytesSent)/2.0 << ", " << server->bytesSent << ", " << client->bytesSent << ", "
+        //     << (server->bytesSent + client->bytesSent)/2.0 << ',' << server->bytesSent << ',' << client->bytesSent << ','
         //     << (totalTime + accumulatedInputTimeOffline) << std::endl;
     }
     std::cerr << "=========\n";
@@ -1883,17 +1885,17 @@ void TanH(int64_t I, int64_t J, int64_t scale_in, int64_t scale_out,
         std::cerr << "Online Communication = " << peer->bytesSent + peer->bytesReceived + inputOnlineCommVaried << " bytes\n";
         std::cerr << "Online Time = " << (totalTime + accumulatedInputTimeOnline) / 1000.0 << " milliseconds\n\n";
         std::cout
-            << "Scheme, LUT source, input bitlength, input precision, Number of polynomials, Degree, Online rounds, Online comms (bytes), Bytes sent, Bytes recv, Online time (us)" << std::endl
-            << "LLAMA, " << llama_config::lut_src << ", " << llama_config::ib << ", " << llama_config::sin << ", " << llama_config::numPoly << ", " << llama_config::degree << ", "
-            << numRounds << ", " << peer->bytesSent + peer->bytesReceived << ", " << peer->bytesSent << ", " << peer->bytesReceived << ", "
+            // << "ID, Function, Scheme, LUT source, input bitlength, input precision, output bitlength, output precision, Number of polynomials, Degree, Online rounds, Online comms (bytes), Bytes sent, Bytes recv, Online time (us)" << std::endl
+            << llama_config::function_id << ',' << llama_config::function_name << ',' << "LLAMA, " << llama_config::lut_src << ',' << llama_config::ib << ',' << llama_config::sin << ',' << llama_config::ob << ',' << llama_config::sout << ',' << llama_config::numPoly << ',' << llama_config::degree << ','
+            << numRounds << ',' << peer->bytesSent + peer->bytesReceived << ',' << peer->bytesSent << ',' << peer->bytesReceived << ','
             << (totalTime + accumulatedInputTimeOnline) << std::endl;
     }
     else {
         std::cerr << "Offline Communication = " << server->bytesSent + client->bytesSent << " bytes\n";
         std::cerr << "Offline Time = " << (totalTime + accumulatedInputTimeOffline) / 1000.0 << " milliseconds\n";
         std::cout
-            << "P2 average precomp (bytes), server precomp (bytes), client precomp (bytes), P2 time (us)" << std::endl
-            << (server->bytesSent + client->bytesSent)/2.0 << ", " << server->bytesSent << ", " << client->bytesSent << ", "
+            // << "ID, Function, P2 precomp (bytes), server precomp (bytes), client precomp (bytes), P2 time (us)" << std::endl
+            << llama_config::function_id << ',' << llama_config::function_name << ',' << (server->bytesSent + client->bytesSent)/2.0 << ',' << server->bytesSent << ',' << client->bytesSent << ','
             << (totalTime + accumulatedInputTimeOffline) << std::endl;
     }
 }

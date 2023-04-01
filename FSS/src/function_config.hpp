@@ -13,6 +13,7 @@ namespace llama_config
 {
 
 #if defined(TANH_12_12) // || defined(SIGMOID_TANH_37)
+    std::string function_id = "TANH_12_12";
     std::string function_name = "TANH";
     std::string lut_src = "LLAMA";
     int sin = 12;
@@ -60,6 +61,7 @@ namespace llama_config
         {GroupElement(0, ib), GroupElement(3640, ib), GroupElement(7281, ib), GroupElement(10922, ib), GroupElement(14563, ib), GroupElement(18204, ib), GroupElement(21845, ib), GroupElement(25486, ib), GroupElement(29127, ib), GroupElement(32767, ib),
          GroupElement(-32768, ib), GroupElement(-29128, ib), GroupElement(-25487, ib), GroupElement(-21846, ib), GroupElement(-18205, ib), GroupElement(-14564, ib), GroupElement(-10923, ib), GroupElement(-7282, ib), GroupElement(-3641, ib)};
 #elif defined(TANH_9_9) // scale is not 12 (input scale 9, output scale 9)
+    std::string function_id = "TANH_9_9";
     std::string function_name = "TANH";
     std::string lut_src = "LLAMA";
 
@@ -92,6 +94,7 @@ namespace llama_config
     std::vector<GroupElement> fxd_p{GroupElement(0, ib), GroupElement(355, ib), GroupElement(710, ib), GroupElement(1065, ib), GroupElement(1420, ib), GroupElement(1775, ib), GroupElement(32767, ib),
                                     GroupElement(-1775, ib), GroupElement(-1420, ib), GroupElement(-1065, ib), GroupElement(-710, ib), GroupElement(-355, ib)};
 #elif defined(TANH_8_8)
+    std::string function_id = "TANH_8_8";
     std::string function_name = "TANH";
     int ib = 64, ob = 64, sin = 8, scoef = 18, sout = 8, degree = 2, numPoly = 10;
     std::string lut_src = "LLAMA";
@@ -129,6 +132,7 @@ namespace llama_config
         GroupElement(-400, ib),
         GroupElement(-200, ib)};
 #elif defined(TANH_11_11)
+    std::string function_id = "TANH_11_11";
     std::string function_name = "TANH";
     int ib = 64, ob = 64, sin = 11, scoef = 18, sout = 11, degree = 2, numPoly = 20;
     std::string lut_src = "LLAMA";
@@ -187,6 +191,7 @@ namespace llama_config
         GroupElement(-1893, ib),
         GroupElement(-947, ib)};
 #elif defined(TANH_13_13)
+    std::string function_id = "TANH_13_13";
     std::string function_name = "TANH";
     int ib = 64, ob = 64, sin = 13, scoef = 18, sout = 13, degree = 2, numPoly = 12;
     std::string lut_src = "LLAMA";
@@ -263,6 +268,7 @@ namespace llama_config
         GroupElement(-4682, ib),
         GroupElement(-2341, ib)};
 #elif defined(TANH_GROTTO_9_9)
+    std::string function_id = "TANH_GROTTO_9_9";
     std::string function_name = "TANH";
     int ib = 64, ob = 64, sin = 9, scoef = 9, sout = 9, degree = 3, numPoly = 20;
     std::string lut_src = "GROTTO";
@@ -318,6 +324,7 @@ namespace llama_config
         GroupElement(-238, ib),
         GroupElement(-79, ib)};
 #elif defined(SIGMOID_12_12) // || defined(SIGMOID_TANH_37)
+    std::string function_id = "SIGMOID_12_12";
     std::string function_name = "SIGMOID";
     std::string lut_src = "LLAMA";
     int ib = 64, ob = 64, sin = 12, scoef = 20, sout = 12, degree = 2, numPoly = 20;
@@ -362,6 +369,7 @@ namespace llama_config
                                     GroupElement(-32768, ib), GroupElement(-29128, ib), GroupElement(-25487, ib), GroupElement(-21846, ib), GroupElement(-18205, ib), GroupElement(-14564, ib), GroupElement(-10923, ib), GroupElement(-7282, ib), GroupElement(-3641, ib)};
 
 #elif defined(SIGMOID_9_14)
+    std::string function_id = "SIGMOID_9_14";
     std::string function_name = "SIGMOID";
     //     assert((scaleIn == 9) && (scaleOut == 14));
     std::string lut_src = "LLAMA";
@@ -408,6 +416,7 @@ namespace llama_config
     std::vector<GroupElement> fxd_p{GroupElement(0, ib), GroupElement(3640, ib), GroupElement(7281, ib), GroupElement(10922, ib), GroupElement(14563, ib), GroupElement(18204, ib), GroupElement(21845, ib), GroupElement(25486, ib), GroupElement(29127, ib), GroupElement(32767, ib),
                                     GroupElement(-32768, ib), GroupElement(-29128, ib), GroupElement(-25487, ib), GroupElement(-21846, ib), GroupElement(-18205, ib), GroupElement(-14564, ib), GroupElement(-10923, ib), GroupElement(-7282, ib), GroupElement(-3641, ib)};
 #elif defined(SIGMOID_8_14)
+    std::string function_id = "SIGMOID_8_14";
     std::string function_name = "SIGMOID";
     //     assert((scaleIn == 8) && (scaleOut == 14));
     std::string lut_src = "LLAMA";
@@ -494,6 +503,7 @@ namespace llama_config
                                     GroupElement(-311, ib),
                                     GroupElement(-156, ib)};
 #elif defined(SIGMOID_11_14)
+    std::string function_id = "SIGMOID_11_14";
     std::string function_name = "SIGMOID";
     //     assert((scaleIn == 11) && (scaleOut == 14));
     std::string lut_src = "LLAMA";
@@ -581,6 +591,7 @@ namespace llama_config
         GroupElement(-2485, ib),
         GroupElement(-1243, ib)};
 #elif defined(SIGMOID_13_14)
+    std::string function_id = "SIGMOID_13_14";
     std::string function_name = "SIGMOID";
     //     assert((scaleIn == 13) && (scaleOut == 14));
     std::string lut_src = "LLAMA";
@@ -629,6 +640,7 @@ namespace llama_config
         GroupElement(-9363, ib),
         GroupElement(-4682, ib)};
 #elif defined(SIGMOID_GROTTO_9_9)
+    std::string function_id = "SIGMOID_GROTTO_9_9";
     std::string function_name = "SIGMOID";
     //     assert((scaleIn == 9) && (scaleOut == 9));
     std::string lut_src = "GROTTO";
@@ -818,6 +830,7 @@ namespace llama_config
 //     scaleCoef = 9;
 
 #elif defined(INVSQRT_10_9)
+    std::string function_id = "INVSQRT_10_9";
     std::string function_name = "INVSQRT";
     //     assert((scaleIn == 9) && (scaleOut == 9));
     std::string lut_src = "LLAMA";
@@ -852,6 +865,7 @@ namespace llama_config
     };
 
 #elif defined(INVSQRT_12_11)
+    std::string function_id = "INVSQRT_12_11";
     std::string function_name = "INVSQRT";
     //     assert((scaleIn == 9) && (scaleOut == 9));
     std::string lut_src = "LLAMA";
@@ -885,6 +899,7 @@ namespace llama_config
     std::vector<GroupElement> fxd_p{/* dummy knot x=0 for consistency */  GroupElement(0, ib),   /* actual spline starts here */   GroupElement(409, ib),     GroupElement(661, ib),     GroupElement(914, ib),    GroupElement(1420, ib),    GroupElement(2431, ib),    GroupElement(4453, ib),    GroupElement(8498, ib),   GroupElement(16588, ib),   GroupElement(32768, ib) /* actual spline ends here  */
     };
 #elif defined(INVSQRT_GROTTO_9_9)
+    std::string function_id = "INVSQRT_GROTTO_9_9";
     std::string function_name = "INVSQRT";
     //     assert((scaleIn == 9) && (scaleOut == 9));
     std::string lut_src = "GROTTO";
